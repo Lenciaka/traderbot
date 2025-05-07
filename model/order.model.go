@@ -9,15 +9,15 @@ import (
 type OrderEntity struct {
 	ID           string   `db:"id"`
 	MtID         int      `db:"mt_id"`
-	PortID       string   `db:"port_id"`
-	StrategyID   int      `db:"strategy_id"`
+	PortID       string   `db:"portId"`
+	StrategyID   int      `db:"strategyId"`
 	Action       string   `db:"action"`
 	Price        float64  `db:"price"`
 	Volume       float64  `db:"volume"`
 	TakeProfit   *float64 `db:"takeprofit"`
 	StopLoss     *float64 `db:"stoploss"`
-	IsOrdered    bool     `db:"is_ordered"`
-	IsFinished   bool     `db:"is_finished"`
+	IsOrdered    bool     `db:"isOrdered"`
+	IsFinished   bool     `db:"isFinished"`
 	MtStatus     *int     `db:"mt_status"`
 	Profit       *float64 `db:"profit"`
 	ClosePrice   *float64 `db:"close_price"`
@@ -46,7 +46,7 @@ func (model *OrderModel) GetLatestOrderByPortIDAndStrategyID(ctx context.Context
 	orders := OrderModel{}
 	err := model.db.GetContext(ctx, &orders, `
 		SELECT * FROM orders
-		WHERE port_id = ? AND strategy_id = ? 
+		WHERE portId = ? AND strategyId = ? 
 		ORDER BY created_at desc
 		LIMIT 1
 	`, portID, strategyID)
@@ -57,7 +57,7 @@ func (model *OrderModel) FindByPortIDAndStrategyID(ctx context.Context, portID, 
 	orders := []OrderModel{}
 	err := model.db.SelectContext(ctx, &orders, `
 		SELECT * FROM orders
-		WHERE port_id = ? AND strategy_id = ? ORDER BY created_at desc
+		WHERE portId = ? AND strategyId = ? ORDER BY created_at desc
 	`, portID, strategyID)
 
 	return orders, err
@@ -67,7 +67,7 @@ func (model *OrderModel) FindByPortID(ctx context.Context, portID string) ([]Ord
 	orders := []OrderModel{}
 	err := model.db.SelectContext(ctx, &orders, `
 		SELECT * FROM orders
-		WHERE port_id = ?
+		WHERE portId = ?
 		ORDER BY created_at desc
 	`, portID)
 	return orders, err
@@ -77,7 +77,7 @@ func (model *OrderModel) FindByStrategyID(ctx context.Context, strategyID string
 	orders := []OrderModel{}
 	err := model.db.SelectContext(ctx, &orders, `
 		SELECT * FROM orders
-		WHERE strategy_id = ?
+		WHERE strategyId = ?
 		ORDER BY created_at desc
 	`, strategyID)
 	return orders, err
