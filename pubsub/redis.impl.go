@@ -24,7 +24,6 @@ func (pubsub *RedisPubSub) Publish(ctx context.Context, key string, payload stri
 }
 
 func (pubsub *RedisPubSub) Subscribe(ctx context.Context, keys ...string) (<-chan *SubMessage, error) {
-	defer log.Info().Msgf("Subscribe %v was down", keys)
 	msg := make(chan *SubMessage, 10)
 	ch := pubsub.client.Subscribe(ctx, keys...).Channel()
 	go func() {
