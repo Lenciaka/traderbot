@@ -6,5 +6,5 @@ import (
 )
 
 func ConnectSqlite(uri string) (*sqlx.DB, error) {
-	return sqlx.Open("sqlite3", uri)
+	return sqlx.Open("sqlite", uri)
 }
