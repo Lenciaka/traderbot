@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -36,49 +37,72 @@ func NewOrderModel(db *sqlx.DB) *OrderModel {
 	}
 }
 
-func (model *OrderModel) GetAll(ctx context.Context) ([]OrderModel, error) {
-	orders := []OrderModel{}
+func (model *OrderModel) GetAll(ctx context.Context) ([]OrderEntity, error) {
+	orders := []OrderEntity{}
 	err := model.db.SelectContext(ctx, &orders, "SELECT * FROM orders")
+	if err == sql.ErrNoRows {
+		return orders, nil
+	}
 	return orders, err
 }
 
-func (model *OrderModel) GetLatestOrderByPortIDAndStrategyID(ctx context.Context, portID, strategyID string) (OrderModel, error) {
-	orders := OrderModel{}
+func (model *OrderModel) GetLatestOrderByPortIDAndStrategyID(ctx context.Context, portID, strategyID string) (*OrderEntity, error) {
+	orders := OrderEntity{}
 	err := model.db.GetContext(ctx, &orders, `
 		SELECT * FROM orders
-		WHERE portId = ? AND strategyId = ? 
+		WHERE portId = ? AND strategyId = ? AND isOrdered = 1
 		ORDER BY created_at desc
 		LIMIT 1
 	`, portID, strategyID)
-	return orders, err
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	return &orders, err
 }
 
-func (model *OrderModel) FindByPortIDAndStrategyID(ctx context.Context, portID, strategyID string) ([]OrderModel, error) {
-	orders := []OrderModel{}
+func (model *OrderModel) FindByPortIDAndStrategyID(ctx context.Context, portID, strategyID string) ([]OrderEntity, error) {
+	orders := []OrderEntity{}
 	err := model.db.SelectContext(ctx, &orders, `
 		SELECT * FROM orders
-		WHERE portId = ? AND strategyId = ? ORDER BY created_at desc
+		WHERE portId = ? AND strategyId = ? AND isOrdered = 1
+		ORDER BY created_at desc
 	`, portID, strategyID)
 
+	if err == sql.ErrNoRows {
+		return orders, nil
+	}
+
 	return orders, err
 }
 
-func (model *OrderModel) FindByPortID(ctx context.Context, portID string) ([]OrderModel, error) {
-	orders := []OrderModel{}
+func (model *OrderModel) FindByPortID(ctx context.Context, portID string) ([]OrderEntity, error) {
+	orders := []OrderEntity{}
 	err := model.db.SelectContext(ctx, &orders, `
 		SELECT * FROM orders
-		WHERE portId = ?
+		WHERE portId = ? AND isOrdered = 1
 		ORDER BY created_at desc
 	`, portID)
+
+	if err == sql.ErrNoRows {
+		return orders, nil
+	}
+
 	return orders, err
 }
 
-func (model *OrderModel) FindByStrategyID(ctx context.Context, strategyID string) ([]OrderModel, error) {
-	orders := []OrderModel{}
+func (model *OrderModel) FindByStrategyID(ctx context.Context, strategyID string) ([]OrderEntity, error) {
+	orders := []OrderEntity{}
 	err := model.db.SelectContext(ctx, &orders, `
 		SELECT * FROM orders
-		WHERE strategyId = ?
+		WHERE strategyId = ? AND isOrdered = 1
 		ORDER BY created_at desc
 	`, strategyID)
+
+	if err == sql.ErrNoRows {
+		return orders, nil
+	}
+
 	return orders, err
 }
